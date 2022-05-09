@@ -31,6 +31,7 @@ public class temp {
             }
             else {
                 b = false;
+                //
             }
         }
         for (int i = 0; i < termList.size(); i++) {

@@ -1,40 +1,79 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.Locale;
 
 public class CardImporter {
     private URL webURL;
-    private boolean s;
-    private String[][] flashCards;
+    private ArrayList<ArrayList<String>> flashCards;
 
-    public CardImporter(String a) {
-        s = true;
+    public CardImporter (URL webURL) throws Exception {
+        this.webURL = webURL;
+        flashCards = new ArrayList<>();
+        importCards();
+    }
+
+    public void importCards() throws Exception {
+        URLConnection urlConnect = webURL.openConnection();
+        urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
+        int websiteType = siteType();
+        String attribute = "";
+        String tag = "";
+        switch (websiteType) {
+            case 1 -> {
+                attribute = "<span class=\"TermText notranslate lang-en\">";
+                tag = "</span>";
+            }
+            case 2 -> {
+                attribute = "<div class=\"ans-content\">";
+                tag = "</div>";
+            }
+            case -1 -> {
+                System.out.println("Error: Site not supported");
+                return;
+            }
+        }
         try {
-            webURL = new URL(a);
+            InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
+            BufferedReader bR = new BufferedReader(input);
+            ArrayList<String> termList = new ArrayList<>();
+            ArrayList<String> definitionList = new ArrayList<>();
+            int termOrDefinition = 1;
+            String line;
+            while ((line = bR.readLine()) != null) {
+                int idxStart = line.indexOf(attribute);
+                while (idxStart != -1) {
+                    line = line.substring(idxStart+attribute.length());
+                    int idxEnd = line.indexOf(tag);
+                    String word = line.substring(0,idxEnd);
+                    System.out.println(word);
+                    if (termOrDefinition % 2 == 1) {
+                        termList.add(word);
+                    }
+                    else {
+                        definitionList.add(word);
+                    }
+                    termOrDefinition++;
+                    idxStart = line.indexOf(attribute);
+                }
+            }
+            flashCards.add(termList);
+            flashCards.add(definitionList);
         }
-        catch(MalformedURLException e) {
-            s = false;
+        catch (Exception e) {
+            System.out.println("Failed. Improper Link.");
         }
-
     }
 
-    public void importCards() {
-
-    }
-
-    public void out() throws IOException {
-        BufferedReader bR = new BufferedReader (new InputStreamReader(webURL.openStream()));
-        String output ;
-        while ((output = bR.readLine()) != null) {
-            System.out.println(output);
+    public int siteType() {
+        String url = webURL.toString().toLowerCase();
+        if (url.contains("quizlet")) {
+            return 1;
         }
-        bR.close();
+        else if (url.contains("cram")) {
+            return 2;
+        }
+        return -1;
     }
 
-    public String getURL() {
-        return webURL.toExternalForm();
-    }
-
-    public boolean isSuccessful() {
-        return s;
-    }
 }

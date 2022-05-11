@@ -4,7 +4,7 @@ import java.util.*;
 
 public class temp {
     public static void main(String[] args) throws Exception{
-        URL webURL = new URL("https://quizlet.com/29679191/civil-war-flash-cards/");
+        URL webURL = new URL("https://quizlet.com/698784725/test-flash-cards/");
         URLConnection urlConnect = webURL.openConnection();
         urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
         InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
@@ -12,31 +12,27 @@ public class temp {
         ArrayList<String> termList = new ArrayList<>();
         ArrayList<String> definitionList = new ArrayList<>();
         int termOrDefinition = 1;
-        boolean b = true;
-        while (b) {
-            String line;
-            if ((line = bR.readLine()) != null) {
-                int idxStart = line.indexOf("<span class=\"TermText notranslate lang-en\">");
-                if (idxStart != -1) {
-                    int idxEnd = line.indexOf("</span>");
-                    line = line.substring(idxStart + 1, idxEnd);
-                }
+        String line;
+        while ((line = bR.readLine()) != null) {
+            int idxStart = line.indexOf("<span class=\"TermText notranslate lang-en\">");
+            while (idxStart != -1) {
+                line = line.substring(idxStart+43);
+                int idxEnd = line.indexOf("</span>");
+                String word = line.substring(0,idxEnd);
+                System.out.println(word);
                 if (termOrDefinition % 2 == 1) {
-                    termList.add(line);
+                    termList.add(word);
                 }
                 else {
-                    definitionList.add(line);
+                    definitionList.add(word);
                 }
                 termOrDefinition++;
-            }
-            else {
-                b = false;
-                //
+                idxStart = line.indexOf("<span class=\"TermText notranslate lang-en\">");
             }
         }
         for (int i = 0; i < termList.size(); i++) {
-            System.out.println(termList.get(i));
-            System.out.println(definitionList.get(i));
+            System.out.println("Term: " + termList.get(i));
+            System.out.println("Definition: " + definitionList.get(i));
         }
     }
 }

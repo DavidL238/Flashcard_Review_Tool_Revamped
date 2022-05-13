@@ -25,8 +25,8 @@ public class CardImporter {
                 tag = "</span>";
             }
             case 2 -> {
-                attribute = "<div class=\"ans-content\">";
-                tag = "</div>";
+                attribute = "<font class=\"font-s\">";
+                tag = "</font>";
             }
             case -1 -> {
                 System.out.println("Error: Site not supported");
@@ -43,7 +43,7 @@ public class CardImporter {
             while ((line = bR.readLine()) != null) {
                 int idxStart = line.indexOf(attribute);
                 while (idxStart != -1) {
-                    line = line.substring(idxStart+attribute.length());
+                    line = line.substring(idxStart + attribute.length());
                     int idxEnd = line.indexOf(tag);
                     String word = line.substring(0,idxEnd);
                     System.out.println(word);

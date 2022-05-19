@@ -1,11 +1,11 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class CardImporter {
     private URL webURL;
     private ArrayList<ArrayList<String>> flashCards;
+    private String topic, author;
 
     public CardImporter (URL webURL) throws Exception {
         this.webURL = webURL;
@@ -34,6 +34,9 @@ public class CardImporter {
             }
         }
         try {
+            topic = findElement("<h1 class=\"UIHeading UIHeading--one\">", "</h1>");
+            author = findElement("<span class=\"UserLink-username\">", "</span>");
+
             InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
             BufferedReader bR = new BufferedReader(input);
             ArrayList<String> termList = new ArrayList<>();
@@ -74,6 +77,53 @@ public class CardImporter {
             return 2;
         }
         return -1;
+    }
+
+    public String findElement (String openTag, String closingTag) throws Exception {
+        URLConnection urlConnect = webURL.openConnection();
+        urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
+        InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
+        BufferedReader bR = new BufferedReader(input);
+        String name;
+        String found = "";
+        int idx = -1;
+        while ((name = bR.readLine()) != null) {
+            idx = name.indexOf(openTag);
+            if (idx != -1) {
+                found = name;
+                break;
+            }
+        }
+        found = found.substring(idx + openTag.length());
+        return found.substring(0, found.indexOf(closingTag));
+    }
+
+
+
+    public void saveFile() {
+        try {
+            File saveFlash = new File(topic + ".txt");
+            FileWriter fW = new FileWriter(topic + ".txt");
+            if (saveFlash.createNewFile()) {
+                for (int i = 0; i < flashCards.size(); i++) {
+                    String term = flashCards.get(0).get(i);
+                    String def = flashCards.get(1).get(i);
+                    try {
+                        String response = flashCards.get(2).get(i);
+                        fW.write(term + "|" + def + "|" + response);
+                    }
+                    catch (Exception e) {
+                        fW.write(term + "|" + def);
+                    }
+                }
+            }
+            else {
+
+            }
+        }
+        catch (Exception e) {
+
+        }
     }
 
 }

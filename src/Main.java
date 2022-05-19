@@ -5,6 +5,9 @@ public class Main {
     public static void main(String[] args) throws Exception{
         Scanner s = new Scanner(System.in);
         String url = s.nextLine();
+        URL webURL = new URL (url);
+        CardImporter cImporter = new CardImporter(webURL);
+        /*
         try {
             URL webURL = new URL (url);
             CardImporter cImporter = new CardImporter(webURL);
@@ -12,5 +15,7 @@ public class Main {
         catch (Exception e) {
             System.out.println("Error: Improper Link - no protocol");
         }
+
+         */
     }
 }

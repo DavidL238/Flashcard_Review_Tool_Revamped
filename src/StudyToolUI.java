@@ -1,18 +1,20 @@
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
+import java.awt.event.*;
 import java.util.Objects;
+import java.net.*;
 
 public class StudyToolUI implements ActionListener {
     private JCheckBox darkTheme;
-    private JFrame mainUI, settingsUI, cardImporterUI;
-    private JPanel menuPanel, flashPanel, settingsBody;
-    private JButton flashcards, settings, importFlashCards;
-    private JTextField welcome, urlImporter;
-    private Color dark, light, darkGrey;
+    private JFrame mainUI, settingsUI, cardImporterUI, errorUI;
+    private JPanel menuPanel, flashPanel, settingsBody, errorPanel;
+    private JButton flashcards, settings, importFlashCards, importButton, okButton;
+    private JTextField welcome, errorMessage;
+    private JTextArea urlImporter;
+    private Color dark, light, darkGrey, lightGrey;
+    private CardImporter cI;
+    private Border empty;
     private boolean isDark;
 
     public StudyToolUI() {
@@ -20,8 +22,9 @@ public class StudyToolUI implements ActionListener {
         dark = new Color(12,12,12);
         darkGrey = new Color(40,40,40);
         light = new Color(255,255,255);
+        lightGrey = new Color(211, 211, 211);
         Color temp = new Color(255, 0, 0);
-        Border empty = javax.swing.BorderFactory.createEmptyBorder();
+        empty = javax.swing.BorderFactory.createEmptyBorder();
 
         mainUI = new JFrame();
         mainUI.setTitle("Generic Study Tool");
@@ -44,6 +47,11 @@ public class StudyToolUI implements ActionListener {
         cardImporterUI.setLocationRelativeTo(null);
         cardImporterUI.setBackground(new Color(0, 255, 0));
 
+        errorUI = new JFrame("Error");
+        errorUI.setVisible(false);
+        errorUI.setSize(new Dimension(400, 120));
+        errorUI.setLocationRelativeTo(null);
+
         menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.PAGE_AXIS));
         menuPanel.setVisible(true);
@@ -57,6 +65,9 @@ public class StudyToolUI implements ActionListener {
         settingsBody.setVisible(false);
         settingsBody.setBackground(new Color(0, 255, 255));
 
+        errorPanel = new JPanel();
+        errorPanel.setBackground(light);
+
         darkTheme = new JCheckBox("Dark Theme");
         darkTheme.setVisible(true);
         darkTheme.addActionListener(this);
@@ -67,18 +78,23 @@ public class StudyToolUI implements ActionListener {
         flashcards = createIconJButton("images\\flashcards.png");
         settings = createIconJButton("images\\gear.png");
         importFlashCards = createIconJButton("images\\flashcards.png");
+        importButton = createTextJButton("Import Flash Cards");
+        okButton = createTextJButton("OK");
+        okButton.setBackground(lightGrey);
+        okButton.setFocusPainted(false);
 
-        welcome = new JTextField("Welcome!");
-        welcome.setPreferredSize(new Dimension(100, 20));
-        welcome.setEditable(false);
-        welcome.setFocusable(false);
-        welcome.setFont(new Font("Times New Roman", Font.PLAIN, 24)); //better font
-        welcome.setOpaque(false);
-        welcome.setBorder(empty);
+        welcome = createJTextField("Welcome!", 24);
+        errorMessage = createJTextField("", 12);
 
-        urlImporter = new JTextField("Paste URL Here!");
-        urlImporter.setPreferredSize(new Dimension (50, 280));
-        urlImporter.addActionListener(this);
+        urlImporter = new JTextArea("Paste URL Here!");
+        urlImporter.setPreferredSize(new Dimension (50, 90));
+        urlImporter.setLineWrap(true);
+        urlImporter.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent e) {
+                    urlImporter.setText("");
+                }
+            }
+        );
 
         //mainUI.getContentPane().add(backgroundPanel);
         mainUI.getContentPane().add(menuPanel, BorderLayout.LINE_START);
@@ -92,11 +108,16 @@ public class StudyToolUI implements ActionListener {
         settingsUI.add(settingsBody, BorderLayout.CENTER);
         settingsBody.add(darkTheme);
 
-        cardImporterUI.getContentPane().add(urlImporter, BorderLayout.SOUTH);
+        cardImporterUI.getContentPane().add(urlImporter, BorderLayout.CENTER);
+        cardImporterUI.getContentPane().add(importButton, BorderLayout.SOUTH);
 
         welcome.setBounds(0, 0, 100, 20);
         urlImporter.setBounds(0, 200, 50, 280);
 
+        errorUI.getContentPane().add(errorPanel, BorderLayout.CENTER);
+        errorUI.add(okButton, BorderLayout.SOUTH);
+        errorPanel.add(errorMessage, BorderLayout.NORTH);
+        errorMessage.setPreferredSize(new Dimension(380, 40));
 
         mainUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -116,6 +137,26 @@ public class StudyToolUI implements ActionListener {
         return newButton;
     }
 
+    public JButton createTextJButton(String text) {
+        JButton newButton = new JButton(text);
+        newButton.setOpaque(false);
+        newButton.setContentAreaFilled(false);
+        newButton.setBorderPainted(false);
+        newButton.addActionListener(this);
+        return newButton;
+    }
+
+    public JTextField createJTextField(String text, int fontSize) {
+        JTextField newText = new JTextField(text);
+        newText.setPreferredSize(new Dimension(100, 20));
+        newText.setEditable(false);
+        newText.setFocusable(false);
+        newText.setFont(new Font("Tahoma", Font.PLAIN, fontSize)); //better font
+        newText.setOpaque(false);
+        newText.setBorder(empty);
+        return newText;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == darkTheme) {
@@ -130,7 +171,7 @@ public class StudyToolUI implements ActionListener {
             else {
                 darkTheme.setForeground(dark);
                 darkTheme.setBackground(light);
-                menuPanel.setBackground(light);
+                menuPanel.setBackground(lightGrey);
                 flashPanel.setBackground(light);
                 settingsBody.setBackground(light);
                 mainUI.getContentPane().setBackground(light);
@@ -153,10 +194,29 @@ public class StudyToolUI implements ActionListener {
         else if (e.getSource() == importFlashCards) {
             cardImporterUI.setVisible(true);
         }
-        else if (e.getSource() == urlImporter) {
-            if (urlImporter.getText().contains("Paste URL Here!")) {
-                urlImporter.setText("");
+        else if (e.getSource() == importButton) {
+            String url = urlImporter.getText();
+            if (url != null && !url.equals("")) {
+                try {
+                    URL webURL = new URL(url);
+                    cI = new CardImporter(webURL);
+                    if (!cI.isSuccessful()) {
+                        errorMessage.setText("Error: Site not supported");
+                        errorUI.setVisible(true);
+                    }
+                }
+                catch (MalformedURLException malURL) {
+                    errorMessage.setText("Error: Improper URL (MalformedURLException)");
+                    errorUI.setVisible(true);
+                }
+                catch (Exception otherExceptions) {
+                    errorMessage.setText("Error: Something went wrong");
+                    errorUI.setVisible(true);
+                }
             }
+        }
+        else if (e.getSource() == okButton) {
+            errorUI.setVisible(false);
         }
     }
 }

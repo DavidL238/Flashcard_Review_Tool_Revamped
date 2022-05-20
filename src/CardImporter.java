@@ -6,14 +6,15 @@ public class CardImporter {
     private URL webURL;
     private ArrayList<ArrayList<String>> flashCards;
     private String topic, author;
+    private boolean success;
 
     public CardImporter (URL webURL) throws Exception {
         this.webURL = webURL;
         flashCards = new ArrayList<>();
-        importCards();
+        success = importCards();
     }
 
-    public void importCards() throws Exception {
+    public boolean importCards() throws Exception {
         URLConnection urlConnect = webURL.openConnection();
         urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
         int websiteType = siteType();
@@ -29,8 +30,7 @@ public class CardImporter {
                 tag = "</font>";
             }
             case -1 -> {
-                System.out.println("Error: Site not supported");
-                return;
+                return false;
             }
         }
         try {
@@ -49,6 +49,14 @@ public class CardImporter {
                     line = line.substring(idxStart + attribute.length());
                     int idxEnd = line.indexOf(tag);
                     String word = line.substring(0,idxEnd);
+                    while (word.contains("<br>")) {
+                        int brIdx = word.indexOf("<br>");
+                        word = word.substring(0, brIdx) + word.substring(brIdx + 4);
+                    }
+                    while (word.contains("&#")) {
+                        int htmlIdx = word.indexOf("&#");
+                        String temp = word.substring(htmlIdx, word.indexOf(";") + 1);
+                    }
                     System.out.println(word);
                     if (termOrDefinition % 2 == 1) {
                         termList.add(word);
@@ -66,6 +74,7 @@ public class CardImporter {
         catch (Exception e) {
             System.out.println("Failed. Improper Link.");
         }
+        return true;
     }
 
     public int siteType() {
@@ -98,7 +107,9 @@ public class CardImporter {
         return found.substring(0, found.indexOf(closingTag));
     }
 
-
+    public boolean isSuccessful() {
+        return success;
+    }
 
     public void saveFile() {
         try {

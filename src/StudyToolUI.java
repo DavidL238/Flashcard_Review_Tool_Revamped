@@ -6,15 +6,15 @@ import java.util.Objects;
 import java.net.*;
 
 public class StudyToolUI implements ActionListener {
-    private JCheckBox darkTheme;
-    private JFrame mainUI, settingsUI, cardImporterUI, errorUI;
-    private JPanel menuPanel, flashPanel, settingsBody, errorPanel;
-    private JButton flashcards, settings, importFlashCards, importButton, okButton;
-    private JTextField welcome, errorMessage;
-    private JTextArea urlImporter;
-    private Color dark, light, darkGrey, lightGrey;
+    private final JCheckBox darkTheme;
+    private final JFrame mainUI, settingsUI, cardImporterUI, errorUI;
+    private final JPanel menuPanel, flashPanel, settingsBody, errorPanel;
+    private final JButton flashcards, settings, importFlashCards, importButton, okButton;
+    private final JTextField welcome, errorMessage, supportedSites;
+    private final JTextArea urlImporter;
+    private final Color dark, light, darkGrey, lightGrey;
+    private final Border empty;
     private CardImporter cI;
-    private Border empty;
     private boolean isDark;
 
     public StudyToolUI() {
@@ -85,6 +85,8 @@ public class StudyToolUI implements ActionListener {
 
         welcome = createJTextField("Welcome!", 24);
         errorMessage = createJTextField("", 12);
+        supportedSites = createJTextField("Supported Sites: Quizlet & Cram", 12);
+
 
         urlImporter = new JTextArea("Paste URL Here!");
         urlImporter.setPreferredSize(new Dimension (50, 90));
@@ -108,6 +110,7 @@ public class StudyToolUI implements ActionListener {
         settingsUI.add(settingsBody, BorderLayout.CENTER);
         settingsBody.add(darkTheme);
 
+        cardImporterUI.getContentPane().add(supportedSites, BorderLayout.NORTH);
         cardImporterUI.getContentPane().add(urlImporter, BorderLayout.CENTER);
         cardImporterUI.getContentPane().add(importButton, BorderLayout.SOUTH);
 
@@ -120,7 +123,6 @@ public class StudyToolUI implements ActionListener {
         errorMessage.setPreferredSize(new Dimension(380, 40));
 
         mainUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
     }
 
     public JButton createIconJButton(String iconPath) {
@@ -198,10 +200,16 @@ public class StudyToolUI implements ActionListener {
             String url = urlImporter.getText();
             if (url != null && !url.equals("")) {
                 try {
+                    errorUI.setTitle("Error");
                     URL webURL = new URL(url);
                     cI = new CardImporter(webURL);
                     if (!cI.isSuccessful()) {
                         errorMessage.setText("Error: Site not supported");
+                        errorUI.setVisible(true);
+                    }
+                    else {
+                        errorMessage.setText("Imported " + urlImporter.getText());
+                        errorUI.setTitle("Success");
                         errorUI.setVisible(true);
                     }
                 }

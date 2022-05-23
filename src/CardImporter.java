@@ -5,11 +5,13 @@ import java.util.ArrayList;
 public class CardImporter {
     private URL webURL;
     private ArrayList<ArrayList<String>> flashCards;
-    private String topic, author;
+    private String topic, author, site, fileName;
+    private ArrayList<String> allTitles;
     private boolean success;
 
     public CardImporter (URL webURL) throws Exception {
         this.webURL = webURL;
+        allTitles = new ArrayList<>();
         flashCards = new ArrayList<>();
         success = importCards();
     }
@@ -24,10 +26,12 @@ public class CardImporter {
             case 1 -> {
                 attribute = "<span class=\"TermText notranslate lang-en\">";
                 tag = "</span>";
+                site = "Quizlet";
             }
             case 2 -> {
                 attribute = "<font class=\"font-s\">";
                 tag = "</font>";
+                site = "Cram";
             }
             case -1 -> {
                 return false;
@@ -53,9 +57,9 @@ public class CardImporter {
                         int brIdx = word.indexOf("<br>");
                         word = word.substring(0, brIdx) + word.substring(brIdx + 4);
                     }
-                    while (word.contains("&#")) {
-                        int htmlIdx = word.indexOf("&#");
-                        String temp = word.substring(htmlIdx, word.indexOf(";") + 1);
+                    while (word.contains("&quot;")) {
+                        int htmlIdx = word.indexOf("&quot;");
+                        word = word.substring(0, htmlIdx) + "\"" + word.substring(htmlIdx + 6);
                     }
                     System.out.println(word);
                     if (termOrDefinition % 2 == 1) {
@@ -70,8 +74,10 @@ public class CardImporter {
             }
             flashCards.add(termList);
             flashCards.add(definitionList);
+            saveFile();
         }
         catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Failed. Improper Link.");
         }
         return true;
@@ -112,28 +118,54 @@ public class CardImporter {
     }
 
     public void saveFile() {
+        saveFileName();
         try {
-            File saveFlash = new File(topic + ".txt");
-            FileWriter fW = new FileWriter(topic + ".txt");
-            if (saveFlash.createNewFile()) {
-                for (int i = 0; i < flashCards.size(); i++) {
-                    String term = flashCards.get(0).get(i);
-                    String def = flashCards.get(1).get(i);
-                    try {
-                        String response = flashCards.get(2).get(i);
-                        fW.write(term + "|" + def + "|" + response);
-                    }
-                    catch (Exception e) {
-                        fW.write(term + "|" + def);
-                    }
+            File saveFlash = new File (fileName);
+            System.out.println(fileName);
+            saveFlash.createNewFile();
+            PrintWriter pW = new PrintWriter(fileName);
+            for (int i = 0; i < flashCards.get(0).size(); i++) {
+                String term = flashCards.get(0).get(i);
+                String def = flashCards.get(1).get(i);
+                try {
+                    String response = flashCards.get(2).get(i);
+                    pW.println(term + "|" + def + "|" + response);
+                }
+                catch (Exception e) {
+                    pW.println(term + "|" + def);
                 }
             }
-            else {
-
-            }
+            pW.close();
         }
         catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Incomp");
+        }
+    }
 
+    public void saveFileName() {
+        fileName = topic + "_" + author + "_" + site + ".txt";
+        try {
+            for (String title : allTitles) {
+                if (title.equals(fileName)) {
+                    return;
+                }
+            }
+        }
+        catch (NullPointerException pointerException) {}
+        allTitles.add(fileName);
+        try {
+            File saveTitles = new File("List_of_Titles.txt");
+            saveTitles.createNewFile();
+            PrintWriter pW = new PrintWriter("List_of_Titles.txt");
+            for (String titles : allTitles) {
+                pW.println(titles);
+                System.out.println(titles);
+            }
+            pW.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

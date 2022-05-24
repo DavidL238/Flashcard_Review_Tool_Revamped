@@ -2,22 +2,19 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 
-public class CardImporter {
-    private URL webURL;
-    private ArrayList<ArrayList<String>> flashCards;
-    private String topic, author, site, fileName;
-    private ArrayList<String> allTitles;
+public class CardImporter extends CardCreator{
+    private final URL WEBURL;
+    private String site;
     private boolean success;
 
     public CardImporter (URL webURL) throws Exception {
-        this.webURL = webURL;
-        allTitles = new ArrayList<>();
-        flashCards = new ArrayList<>();
+        super();
+        this.WEBURL = webURL;
         success = importCards();
     }
 
     public boolean importCards() throws Exception {
-        URLConnection urlConnect = webURL.openConnection();
+        URLConnection urlConnect = WEBURL.openConnection();
         urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
         int websiteType = siteType();
         String attribute = "";
@@ -38,14 +35,13 @@ public class CardImporter {
             }
         }
         try {
-            topic = findElement("<h1 class=\"UIHeading UIHeading--one\">", "</h1>");
-            author = findElement("<span class=\"UserLink-username\">", "</span>");
+            String topic = findElement("<h1 class=\"UIHeading UIHeading--one\">", "</h1>");
+            String author = findElement("<span class=\"UserLink-username\">", "</span>");
+            String fileName = topic + "_" + author + "_" + site;
+            super.setNameOfSet(fileName);
 
             InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
             BufferedReader bR = new BufferedReader(input);
-            ArrayList<String> termList = new ArrayList<>();
-            ArrayList<String> definitionList = new ArrayList<>();
-            int termOrDefinition = 1;
             String line;
             while ((line = bR.readLine()) != null) {
                 int idxStart = line.indexOf(attribute);
@@ -55,26 +51,16 @@ public class CardImporter {
                     String word = line.substring(0,idxEnd);
                     while (word.contains("<br>")) {
                         int brIdx = word.indexOf("<br>");
-                        word = word.substring(0, brIdx) + word.substring(brIdx + 4);
+                        word = word.substring(0, brIdx) + "\n" + word.substring(brIdx + 4);
                     }
                     while (word.contains("&quot;")) {
                         int htmlIdx = word.indexOf("&quot;");
                         word = word.substring(0, htmlIdx) + "\"" + word.substring(htmlIdx + 6);
                     }
-                    System.out.println(word);
-                    if (termOrDefinition % 2 == 1) {
-                        termList.add(word);
-                    }
-                    else {
-                        definitionList.add(word);
-                    }
-                    termOrDefinition++;
+                    super.addNewCard(word);
                     idxStart = line.indexOf(attribute);
                 }
             }
-            flashCards.add(termList);
-            flashCards.add(definitionList);
-            saveFile();
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -84,7 +70,7 @@ public class CardImporter {
     }
 
     public int siteType() {
-        String url = webURL.toString().toLowerCase();
+        String url = WEBURL.toString().toLowerCase();
         if (url.contains("quizlet")) {
             return 1;
         }
@@ -95,7 +81,7 @@ public class CardImporter {
     }
 
     public String findElement (String openTag, String closingTag) throws Exception {
-        URLConnection urlConnect = webURL.openConnection();
+        URLConnection urlConnect = WEBURL.openConnection();
         urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
         InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
         BufferedReader bR = new BufferedReader(input);
@@ -115,58 +101,6 @@ public class CardImporter {
 
     public boolean isSuccessful() {
         return success;
-    }
-
-    public void saveFile() {
-        saveFileName();
-        try {
-            File saveFlash = new File (fileName);
-            System.out.println(fileName);
-            saveFlash.createNewFile();
-            PrintWriter pW = new PrintWriter(fileName);
-            for (int i = 0; i < flashCards.get(0).size(); i++) {
-                String term = flashCards.get(0).get(i);
-                String def = flashCards.get(1).get(i);
-                try {
-                    String response = flashCards.get(2).get(i);
-                    pW.println(term + "|" + def + "|" + response);
-                }
-                catch (Exception e) {
-                    pW.println(term + "|" + def);
-                }
-            }
-            pW.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Incomp");
-        }
-    }
-
-    public void saveFileName() {
-        fileName = topic + "_" + author + "_" + site + ".txt";
-        try {
-            for (String title : allTitles) {
-                if (title.equals(fileName)) {
-                    return;
-                }
-            }
-        }
-        catch (NullPointerException pointerException) {}
-        allTitles.add(fileName);
-        try {
-            File saveTitles = new File("List_of_Titles.txt");
-            saveTitles.createNewFile();
-            PrintWriter pW = new PrintWriter("List_of_Titles.txt");
-            for (String titles : allTitles) {
-                pW.println(titles);
-                System.out.println(titles);
-            }
-            pW.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 }

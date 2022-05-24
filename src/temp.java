@@ -4,7 +4,7 @@ import java.util.*;
 
 public class temp {
     public static void main(String[] args) throws Exception{
-        URL webURL = new URL("https://quizlet.com/698784725/test-flash-cards/");
+        URL webURL = new URL("https://quizlet.com/2039953/french-revolution-flash-cards/");
         URLConnection urlConnect = webURL.openConnection();
         urlConnect.addRequestProperty("User-Agent", "Mozilla/4.76");
         InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
@@ -33,6 +33,7 @@ public class temp {
         for (int i = 0; i < termList.size(); i++) {
             System.out.println("Term: " + termList.get(i));
             System.out.println("Definition: " + definitionList.get(i));
+            System.out.println(i);
         }
     }
 }

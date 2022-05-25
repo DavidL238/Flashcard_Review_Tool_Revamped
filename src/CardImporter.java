@@ -51,7 +51,7 @@ public class CardImporter extends CardCreator{
                     String word = line.substring(0,idxEnd);
                     while (word.contains("<br>")) {
                         int brIdx = word.indexOf("<br>");
-                        word = word.substring(0, brIdx) + "\n" + word.substring(brIdx + 4);
+                        word = word.substring(0, brIdx) + " " + word.substring(brIdx + 4);
                     }
                     while (word.contains("&quot;")) {
                         int htmlIdx = word.indexOf("&quot;");

@@ -8,8 +8,8 @@ import java.net.*;
 public class StudyToolUI implements ActionListener {
     private final JCheckBox darkTheme;
     private final JFrame mainUI, settingsUI, cardImporterUI, errorUI;
-    private final JPanel menuPanel, flashPanel, settingsBody, errorPanel;
-    private final JButton flashcards, settings, importFlashCards, importButton, okButton;
+    private final JPanel menuPanel, flashPanel, creationPanel, settingsPanel, errorPanel;
+    private final JButton flashcards, settings, createNewDeck, importFlashCards, importButton, okButton;
     private final JTextField welcome, errorMessage, supportedSites;
     private final JTextArea urlImporter;
     private final Color dark, light, darkGrey, lightGrey;
@@ -57,13 +57,16 @@ public class StudyToolUI implements ActionListener {
         menuPanel.setVisible(true);
         menuPanel.setBackground(new Color(255,255,255));
 
+        creationPanel = new JPanel();
+
+
         flashPanel = new JPanel();
         flashPanel.setVisible(true);
         flashPanel.setBackground(new Color(0, 255, 0));
 
-        settingsBody = new JPanel();
-        settingsBody.setVisible(false);
-        settingsBody.setBackground(new Color(0, 255, 255));
+        settingsPanel = new JPanel();
+        settingsPanel.setVisible(false);
+        settingsPanel.setBackground(new Color(0, 255, 255));
 
         errorPanel = new JPanel();
         errorPanel.setBackground(light);
@@ -77,7 +80,15 @@ public class StudyToolUI implements ActionListener {
 
         flashcards = createIconJButton("images\\flashcards.png");
         settings = createIconJButton("images\\gear.png");
-        importFlashCards = createIconJButton("images\\flashcards.png");
+
+        importFlashCards = createTextJButton("Import Flash Cards");
+        importFlashCards.setBackground(lightGrey);
+        importFlashCards.setOpaque(true);
+
+        createNewDeck = createTextJButton("Create New Deck");
+        createNewDeck.setBackground(lightGrey);
+        createNewDeck.setOpaque(true);
+
         importButton = createTextJButton("Import Flash Cards");
         okButton = createTextJButton("OK");
         okButton.setBackground(lightGrey);
@@ -104,11 +115,12 @@ public class StudyToolUI implements ActionListener {
         menuPanel.add(flashcards);
         menuPanel.add(settings);
         flashPanel.add(welcome);
+        flashPanel.add(createNewDeck);
         flashPanel.add(importFlashCards);
         mainUI.revalidate();
 
-        settingsUI.add(settingsBody, BorderLayout.CENTER);
-        settingsBody.add(darkTheme);
+        settingsUI.add(settingsPanel, BorderLayout.CENTER);
+        settingsPanel.add(darkTheme);
 
         cardImporterUI.getContentPane().add(supportedSites, BorderLayout.NORTH);
         cardImporterUI.getContentPane().add(urlImporter, BorderLayout.CENTER);
@@ -145,6 +157,7 @@ public class StudyToolUI implements ActionListener {
         newButton.setContentAreaFilled(false);
         newButton.setBorderPainted(false);
         newButton.addActionListener(this);
+        newButton.setFocusPainted(false);
         return newButton;
     }
 
@@ -167,7 +180,7 @@ public class StudyToolUI implements ActionListener {
                 darkTheme.setBackground(darkGrey);
                 menuPanel.setBackground(dark);
                 flashPanel.setBackground(darkGrey);
-                settingsBody.setBackground(darkGrey);
+                settingsPanel.setBackground(darkGrey);
                 mainUI.setBackground(dark);
             }
             else {
@@ -175,7 +188,7 @@ public class StudyToolUI implements ActionListener {
                 darkTheme.setBackground(light);
                 menuPanel.setBackground(lightGrey);
                 flashPanel.setBackground(light);
-                settingsBody.setBackground(light);
+                settingsPanel.setBackground(light);
                 mainUI.getContentPane().setBackground(light);
             }
             isDark = !isDark;
@@ -185,13 +198,16 @@ public class StudyToolUI implements ActionListener {
             mainUI.setVisible(true);
             mainUI.add(menuPanel, BorderLayout.LINE_START);
             settingsUI.setVisible(false);
-            settingsBody.setVisible(false);
+            settingsPanel.setVisible(false);
             mainUI.revalidate();
         }
         else if (e.getSource() == settings) {
             settingsUI.setVisible(true);
-            settingsBody.setVisible(true);
+            settingsPanel.setVisible(true);
             settingsUI.revalidate();
+        }
+        else if (e.getSource() == createNewDeck) {
+            
         }
         else if (e.getSource() == importFlashCards) {
             cardImporterUI.setVisible(true);

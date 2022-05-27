@@ -201,4 +201,25 @@ public class CardCreator {
             System.out.println(cC.getNameOfSet());
         }
     }
+
+    public static ArrayList<String> getAllTitles() {
+        return allTitles;
+    }
+
+    public static CardCreator getSelectedDeck(String nameOfSet) {
+        for (CardCreator cC : allFlashCards) {
+            if (cC.getNameOfSet().equals(nameOfSet)) {
+                return cC;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<String> getTerms() {
+        return terms;
+    }
+
+    public ArrayList<String> getDefinitions() {
+        return definitions;
+    }
 }

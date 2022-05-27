@@ -1,20 +1,26 @@
+import com.sun.jdi.request.MonitorContendedEnteredRequest;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.net.*;
 
 public class StudyToolUI implements ActionListener {
     private final JCheckBox darkTheme;
-    private final JFrame mainUI, settingsUI, cardImporterUI, errorUI;
-    private final JPanel menuPanel, flashPanel, creationPanel, settingsPanel, errorPanel;
-    private final JButton flashcards, settings, createNewDeck, importFlashCards, importButton, okButton;
-    private final JTextField welcome, errorMessage, supportedSites;
-    private final JTextArea urlImporter;
+    private final JFrame mainUI, settingsUI, creationUI, selectionUI, editorUI, cardImporterUI, responseUI;
+    private final JPanel menuPanel, flashPanel, creationPanel, editorPanel, settingsPanel, responsePanel;
+    private final JButton cardsIconButton, settingsIconButton, newDeckButton, createDeckButton, editDeckButton, confirmEditButton,
+            mainImportButton, importButton, okButton;
+    private final JTextField errorMessage, supportedSites;
+    private final JTextArea urlImporter, deckName, deckTerm, deckDefinition;
+    private final JLabel welcomeLabel, deckNameLabel, deckTermLabel, deckDefinitionLabel;
+    private JComboBox deckComboBox, deckTermsComboBox, deckDefinitionsComboBox;
     private final Color dark, light, darkGrey, lightGrey;
     private final Border empty;
-    private CardImporter cI;
     private boolean isDark;
 
     public StudyToolUI() {
@@ -26,50 +32,41 @@ public class StudyToolUI implements ActionListener {
         Color temp = new Color(255, 0, 0);
         empty = javax.swing.BorderFactory.createEmptyBorder();
 
-        mainUI = new JFrame();
-        mainUI.setTitle("Generic Study Tool");
+        mainUI = createJFrame("Java Study Tool", 852, 720);
         mainUI.setVisible(true);
-        mainUI.setSize(852, 720);
-        mainUI.setResizable(false);
-        mainUI.setLocationRelativeTo(null);
-
-        settingsUI = new JFrame("Settings");
-        settingsUI.setVisible(false);
-        settingsUI.setSize(600, 600);
-        settingsUI.setResizable(false);
-        settingsUI.setLocationRelativeTo(null);
-        settingsUI.setBackground(new Color(0, 0, 255));
-
-        cardImporterUI = new JFrame("Card Importer");
-        cardImporterUI.setVisible(false);
-        cardImporterUI.setSize(300, 300);
-        cardImporterUI.setResizable(false);
-        cardImporterUI.setLocationRelativeTo(null);
-        cardImporterUI.setBackground(new Color(0, 255, 0));
-
-        errorUI = new JFrame("Error");
-        errorUI.setVisible(false);
-        errorUI.setSize(new Dimension(400, 120));
-        errorUI.setLocationRelativeTo(null);
+        settingsUI = createJFrame("Settings", 600, 600);
+        cardImporterUI = createJFrame("Card Importer", 300, 300);
+        creationUI = createJFrame("Deck Creator", 600, 600);
+        selectionUI = createJFrame("Select Deck", 300, 90);
+        editorUI = createJFrame("Edit Deck", 900, 900);
+        responseUI = createJFrame("Error", 400, 120);
 
         menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.PAGE_AXIS));
         menuPanel.setVisible(true);
-        menuPanel.setBackground(new Color(255,255,255));
+        menuPanel.setBackground(lightGrey);
 
         creationPanel = new JPanel();
+        GroupLayout creationLayout = new GroupLayout(creationPanel);
+        creationLayout.setAutoCreateGaps(true);
+        creationLayout.setAutoCreateContainerGaps(true);
+        creationPanel.setLayout(creationLayout);
+        creationPanel.setVisible(false);
+        creationPanel.setBackground(lightGrey);
 
+        editorPanel = new JPanel();
+        editorPanel.setBackground(lightGrey);
 
         flashPanel = new JPanel();
         flashPanel.setVisible(true);
-        flashPanel.setBackground(new Color(0, 255, 0));
+        flashPanel.setBackground(light);
 
         settingsPanel = new JPanel();
         settingsPanel.setVisible(false);
-        settingsPanel.setBackground(new Color(0, 255, 255));
+        settingsPanel.setBackground(light);
 
-        errorPanel = new JPanel();
-        errorPanel.setBackground(light);
+        responsePanel = new JPanel();
+        responsePanel.setBackground(light);
 
         darkTheme = new JCheckBox("Dark Theme");
         darkTheme.setVisible(true);
@@ -78,63 +75,146 @@ public class StudyToolUI implements ActionListener {
         darkTheme.setPreferredSize(new Dimension(100, 25));
         darkTheme.setBackground(temp);
 
-        flashcards = createIconJButton("images\\flashcards.png");
-        settings = createIconJButton("images\\gear.png");
+        cardsIconButton = createIconJButton("images\\flashcards.png");
+        settingsIconButton = createIconJButton("images\\gear.png");
 
-        importFlashCards = createTextJButton("Import Flash Cards");
-        importFlashCards.setBackground(lightGrey);
-        importFlashCards.setOpaque(true);
+        mainImportButton = createTextJButton("Import Flash Cards");
+        mainImportButton.setBackground(lightGrey);
+        mainImportButton.setOpaque(true);
 
-        createNewDeck = createTextJButton("Create New Deck");
-        createNewDeck.setBackground(lightGrey);
-        createNewDeck.setOpaque(true);
+        newDeckButton = createTextJButton("Create New Deck");
+        newDeckButton.setBackground(lightGrey);
+        newDeckButton.setOpaque(true);
+
+        createDeckButton = createTextJButton("Finalize");
+        createDeckButton.setBackground(light);
+        createDeckButton.setOpaque(true);
+
+        editDeckButton = createTextJButton("Edit Existing Deck");
+        editDeckButton.setBackground(lightGrey);
+        editDeckButton.setOpaque(true);
+
+        confirmEditButton = createTextJButton("Edit");
+        confirmEditButton.setBackground(light);
+        confirmEditButton.setOpaque(true);
 
         importButton = createTextJButton("Import Flash Cards");
         okButton = createTextJButton("OK");
         okButton.setBackground(lightGrey);
         okButton.setFocusPainted(false);
 
-        welcome = createJTextField("Welcome!", 24);
+        welcomeLabel = new JLabel("Welcome");
         errorMessage = createJTextField("", 12);
         supportedSites = createJTextField("Supported Sites: Quizlet & Cram", 12);
-
 
         urlImporter = new JTextArea("Paste URL Here!");
         urlImporter.setPreferredSize(new Dimension (50, 90));
         urlImporter.setLineWrap(true);
         urlImporter.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent e) {
-                    urlImporter.setText("");
-                }
+            public void mouseClicked(MouseEvent e) {
+                urlImporter.setText("");
             }
+          }
         );
 
-        //mainUI.getContentPane().add(backgroundPanel);
+        deckName = new JTextArea("Deck Name");
+        deckName.setPreferredSize(new Dimension (50, 50));
+        deckName.setLineWrap(true);
+        deckName.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                deckName.setText("");
+            }
+          }
+        );
+
+        deckTerm = new JTextArea("Deck Term");
+        deckTerm.setPreferredSize(new Dimension (50, 50));
+        deckTerm.setLineWrap(true);
+        deckTerm.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                deckTerm.setText("");
+            }
+          }
+        );
+
+        deckDefinition = new JTextArea("Deck Definition");
+        deckDefinition.setPreferredSize(new Dimension(50 , 50));
+        deckDefinition.setLineWrap(true);
+        deckDefinition.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                deckDefinition.setText("");
+            }
+          }
+        );
+
+        deckNameLabel = new JLabel("Name of Deck:");
+        deckTermLabel = new JLabel("Deck Term:");
+        deckDefinitionLabel = new JLabel("Deck Definition:");
+
         mainUI.getContentPane().add(menuPanel, BorderLayout.LINE_START);
         mainUI.getContentPane().add(flashPanel, BorderLayout.CENTER);
-        menuPanel.add(flashcards);
-        menuPanel.add(settings);
-        flashPanel.add(welcome);
-        flashPanel.add(createNewDeck);
-        flashPanel.add(importFlashCards);
+        menuPanel.add(cardsIconButton);
+        menuPanel.add(settingsIconButton);
+        flashPanel.add(welcomeLabel);
+        flashPanel.add(newDeckButton);
+        flashPanel.add(editDeckButton);
+        flashPanel.add(mainImportButton);
         mainUI.revalidate();
 
         settingsUI.add(settingsPanel, BorderLayout.CENTER);
         settingsPanel.add(darkTheme);
 
+        editorUI.add(editorPanel);
+
         cardImporterUI.getContentPane().add(supportedSites, BorderLayout.NORTH);
         cardImporterUI.getContentPane().add(urlImporter, BorderLayout.CENTER);
         cardImporterUI.getContentPane().add(importButton, BorderLayout.SOUTH);
 
-        welcome.setBounds(0, 0, 100, 20);
+        welcomeLabel.setBounds(0, 0, 100, 20);
         urlImporter.setBounds(0, 200, 50, 280);
 
-        errorUI.getContentPane().add(errorPanel, BorderLayout.CENTER);
-        errorUI.add(okButton, BorderLayout.SOUTH);
-        errorPanel.add(errorMessage, BorderLayout.NORTH);
+        responseUI.getContentPane().add(responsePanel, BorderLayout.CENTER);
+        responseUI.add(okButton, BorderLayout.SOUTH);
+        responsePanel.add(errorMessage, BorderLayout.NORTH);
         errorMessage.setPreferredSize(new Dimension(380, 40));
 
+        creationUI.getContentPane().add(creationPanel);
+        creationLayout.setHorizontalGroup(
+                creationLayout.createParallelGroup(GroupLayout.Alignment.CENTER)
+                        .addComponent(deckNameLabel)
+                        .addComponent(deckName)
+                        .addGroup(creationLayout.createParallelGroup(GroupLayout.Alignment.CENTER))
+                            .addComponent(deckTermLabel)
+                            .addComponent(deckTerm)
+                            .addComponent(deckDefinitionLabel)
+                            .addComponent(deckDefinition)
+                        .addGroup(creationLayout.createParallelGroup(GroupLayout.Alignment.TRAILING))
+                            .addComponent(createDeckButton)
+        );
+        creationLayout.setVerticalGroup(
+                creationLayout.createSequentialGroup()
+                        .addComponent(deckNameLabel)
+                        .addComponent(deckName)
+                        .addGroup(creationLayout.createParallelGroup(GroupLayout.Alignment.CENTER))
+                            .addComponent(deckTermLabel)
+                            .addComponent(deckTerm)
+                            .addComponent(deckDefinitionLabel)
+                            .addComponent(deckDefinition)
+                        .addGroup(creationLayout.createParallelGroup(GroupLayout.Alignment.TRAILING))
+                            .addComponent(createDeckButton)
+        );
+
         mainUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public JFrame createJFrame(String name, int dimensionX, int dimensionY) {
+        JFrame returnFrame = new JFrame(name);
+        returnFrame.setVisible(false);
+        returnFrame.setSize(dimensionX, dimensionY);
+        returnFrame.setResizable(false);
+        returnFrame.setLocationRelativeTo(null);
+        returnFrame.setBackground(new Color(0, 255, 0));
+        return returnFrame;
     }
 
     public JButton createIconJButton(String iconPath) {
@@ -194,53 +274,100 @@ public class StudyToolUI implements ActionListener {
             isDark = !isDark;
             // Implement saving
         }
-        else if (e.getSource() == flashcards) {
+        else if (e.getSource() == cardsIconButton) {
             mainUI.setVisible(true);
             mainUI.add(menuPanel, BorderLayout.LINE_START);
             settingsUI.setVisible(false);
             settingsPanel.setVisible(false);
             mainUI.revalidate();
         }
-        else if (e.getSource() == settings) {
+        else if (e.getSource() == settingsIconButton) {
             settingsUI.setVisible(true);
             settingsPanel.setVisible(true);
             settingsUI.revalidate();
         }
-        else if (e.getSource() == createNewDeck) {
-            
+        else if (e.getSource() == newDeckButton) {
+            creationUI.setVisible(true);
+            creationPanel.setVisible(true);
         }
-        else if (e.getSource() == importFlashCards) {
+        else if (e.getSource() == createDeckButton) {
+            CardCreator cardCreator = new CardCreator(deckName.getText() + ".txt");
+            cardCreator.addNewCard(deckTerm.getText(), deckDefinition.getText());
+            creationUI.setVisible(false);
+        }
+        else if (e.getSource() == editDeckButton) {
+            ArrayList<String> allTitles = CardCreator.getAllTitles();
+            deckComboBox = new JComboBox();
+            for (String allTitle : allTitles) {
+                deckComboBox.addItem(allTitle);
+            }
+            deckComboBox.setEditable(false);
+            selectionUI.getContentPane().add(deckComboBox, BorderLayout.NORTH);
+            selectionUI.getContentPane().add(confirmEditButton, BorderLayout.SOUTH);
+            selectionUI.setVisible(true);
+        }
+        else if (e.getSource() == confirmEditButton) {
+            selectionUI.setVisible(false);
+            editorUI.setVisible(true);
+            String nameOfSet = String.valueOf(deckComboBox.getSelectedItem());
+            CardCreator editSet = CardCreator.getSelectedDeck(nameOfSet);
+            if (editSet != null) {
+                ArrayList<String> terms = editSet.getTerms();
+                ArrayList<String> definitions = editSet.getDefinitions();
+                deckTermsComboBox = new JComboBox();
+                for (String term : terms) {
+                    JTextArea temp = new JTextArea();
+                    temp.setLineWrap(true);
+                    temp.setText(term);
+                    deckTermsComboBox.addItem(temp);
+                }
+                deckDefinitionsComboBox = new JComboBox();
+                for (String definition : definitions) {
+                    deckDefinitionsComboBox.addItem(definition);
+                }
+                JPanel tempCenterPanel = new JPanel();
+                GridLayout editorLayout = new GridLayout(2,1);
+                tempCenterPanel.setLayout(editorLayout);
+                tempCenterPanel.add(deckTermsComboBox);
+                tempCenterPanel.add(deckDefinitionsComboBox);
+                JLabel a = new JLabel("HI");
+                editorPanel.add(a, BorderLayout.NORTH);
+                editorPanel.add(tempCenterPanel, BorderLayout.CENTER);
+            }
+
+        }
+        else if (e.getSource() == mainImportButton) {
             cardImporterUI.setVisible(true);
         }
         else if (e.getSource() == importButton) {
             String url = urlImporter.getText();
             if (url != null && !url.equals("")) {
                 try {
-                    errorUI.setTitle("Error");
+                    responseUI.setTitle("Error");
                     URL webURL = new URL(url);
-                    cI = new CardImporter(webURL);
+                    CardImporter cI = new CardImporter(webURL);
                     if (!cI.isSuccessful()) {
                         errorMessage.setText("Error: Site not supported");
-                        errorUI.setVisible(true);
+                        responseUI.setVisible(true);
                     }
                     else {
                         errorMessage.setText("Imported " + urlImporter.getText());
-                        errorUI.setTitle("Success");
-                        errorUI.setVisible(true);
+                        responseUI.setTitle("Success");
+                        responseUI.setVisible(true);
                     }
                 }
                 catch (MalformedURLException malURL) {
                     errorMessage.setText("Error: Improper URL (MalformedURLException)");
-                    errorUI.setVisible(true);
+                    responseUI.setVisible(true);
                 }
                 catch (Exception otherExceptions) {
                     errorMessage.setText("Error: Something went wrong");
-                    errorUI.setVisible(true);
+                    responseUI.setVisible(true);
                 }
             }
         }
         else if (e.getSource() == okButton) {
-            errorUI.setVisible(false);
+            responseUI.setVisible(false);
         }
     }
 }

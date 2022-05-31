@@ -55,12 +55,20 @@ public class CardCreator {
             lengthOfCurrentDeck++;
             saveFile();
         }
-        catch (Exception e) {
-        }
-
+        catch (Exception e) {}
     }
 
-    public boolean removeCard(String term) {
+    public void addNewCard(String term, String definition, int index) {
+        try {
+            terms.add(index, term);
+            definitions.add(index, definition);
+            lengthOfCurrentDeck++;
+            saveFile();
+        }
+        catch (Exception e) {}
+    }
+
+    public void removeCard(String term, String newTerm, String newDefinition) {
         int index = -1;
         try {
             for (int i = 0; i < terms.size(); i++) {
@@ -68,24 +76,22 @@ public class CardCreator {
                     index = i;
                 }
             }
-            return removeCard(index);
+            removeCard(index);
+            addNewCard(newTerm, newDefinition, index);
         }
         catch (IndexOutOfBoundsException iE) {
             iE.printStackTrace();
-            return false;
         }
     }
 
-    public boolean removeCard(int index) {
+    public void removeCard(int index) {
         try {
             terms.remove(index);
             definitions.remove(index);
             saveFile();
-            return true;
         }
         catch (IndexOutOfBoundsException iE) {
             iE.printStackTrace();
-            return false;
         }
     }
 

@@ -1,10 +1,7 @@
-import com.sun.jdi.request.MonitorContendedEnteredRequest;
-
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.net.*;
@@ -323,6 +320,12 @@ public class StudyToolUI implements ActionListener {
             settingsUI.revalidate();
         }
         else if (e.getSource() == mainStudyButton) {
+            try {
+                selectionUI.remove(confirmEditButton);
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
+            }
             ArrayList<String> allTitles = CardCreator.getAllTitles();
             deckComboBox = new JComboBox();
             for (String allTitle : allTitles) {
@@ -368,6 +371,12 @@ public class StudyToolUI implements ActionListener {
             creationUI.setVisible(false);
         }
         else if (e.getSource() == editDeckButton) {
+            try {
+                selectionUI.remove(confirmSelectionButton);
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
+            }
             ArrayList<String> allTitles = CardCreator.getAllTitles();
             deckComboBox = new JComboBox();
             for (String allTitle : allTitles) {
@@ -384,16 +393,24 @@ public class StudyToolUI implements ActionListener {
             nameOfSet = String.valueOf(deckComboBox.getSelectedItem());
             CardCreator editSet = CardCreator.getSelectedDeck(nameOfSet);
             if (editSet != null) {
-                ArrayList<String> terms = editSet.getTerms();
-                ArrayList<String> definitions = editSet.getDefinitions();
+                selectedTerms = editSet.getTerms();
+                selectedDefinitions = editSet.getDefinitions();
                 deckTermsComboBox = new JComboBox();
-                for (String term : terms) {
-                    deckTermsComboBox.addItem(term);
+                for (int i = 0; i < selectedTerms.size(); i++) {
+                    String temp = selectedTerms.get(i);
+                    if (temp.length() > 30) {
+                        temp = temp.substring(0, 30) + "...";
+                    }
+                    deckTermsComboBox.addItem((i+1) + ". " + temp);
                 }
                 deckTermsComboBox.addActionListener(this);
                 deckDefinitionsComboBox = new JComboBox();
-                for (String definition : definitions) {
-                    deckDefinitionsComboBox.addItem(definition);
+                for (int i = 0; i < selectedDefinitions.size(); i++) {
+                    String temp = selectedDefinitions.get(i);
+                    if (temp.length() > 30) {
+                        temp = temp.substring(0, 30) + "...";
+                    }
+                    deckDefinitionsComboBox.addItem((i+1) + ". " + temp);
                 }
                 deckDefinitionsComboBox.addActionListener(this);
                 replaceTerm = new JTextArea();
@@ -417,11 +434,13 @@ public class StudyToolUI implements ActionListener {
             }
         }
         else if (e.getSource() == deckTermsComboBox) {
-            replaceTerm.setText(String.valueOf(deckTermsComboBox.getSelectedItem()));
+            index = deckTermsComboBox.getSelectedIndex();
+            replaceTerm.setText(selectedTerms.get(index));
             editorPanel.revalidate();
         }
         else if (e.getSource() == deckDefinitionsComboBox) {
-            replaceDefinition.setText(String.valueOf(deckDefinitionsComboBox.getSelectedItem()));
+            index = deckTermsComboBox.getSelectedIndex();
+            replaceDefinition.setText(selectedDefinitions.get(index));
             editorPanel.revalidate();
         }
         else if (e.getSource() == makeEditButton) {

@@ -68,6 +68,16 @@ public class CardCreator {
         catch (Exception e) {}
     }
 
+    public void replaceCard(int index, String termOrDef, boolean isTerm) {
+        if (isTerm) {
+            terms.set(index, termOrDef);
+        }
+        else {
+            definitions.set(index, termOrDef);
+        }
+        saveFile();
+    }
+
     public void removeCard(String term, String newTerm, String newDefinition) {
         int index = -1;
         try {

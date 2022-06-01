@@ -7,19 +7,18 @@ import java.util.Objects;
 import java.net.*;
 
 public class StudyToolUI implements ActionListener {
-    private final JCheckBox darkTheme;
-    private final JFrame mainUI, settingsUI, creationUI, selectionUI, editorUI, studyUI, cardImporterUI, responseUI;
-    private final JPanel menuPanel, flashPanel, creationPanel, settingsPanel, responsePanel;
+    private JCheckBox darkTheme;
+    private JFrame mainUI, settingsUI, creationUI, selectionUI, editorUI, studyUI, cardImporterUI, responseUI;
+    private JPanel menuPanel, flashPanel, creationPanel, settingsPanel, responsePanel;
     private JPanel editorPanel;
-    private final JButton cardsIconButton, settingsIconButton, newDeckButton, createDeckButton, editDeckButton, confirmEditButton, makeEditButton,
+    private JButton cardsIconButton, settingsIconButton, newDeckButton, createDeckButton, editDeckButton, confirmEditButton, makeEditButton,
             newCardButton, mainStudyButton, confirmSelectionButton, flashcardDisplayButton, nextButton, previousButton, mainImportButton, importButton, okButton;
-    private final JTextField errorMessage, supportedSites;
-    private final JTextArea urlImporter, deckName, deckTerm, deckDefinition;
-    private JTextArea replaceTerm, replaceDefinition;
-    private final JLabel welcomeLabel, deckNameLabel, deckTermLabel, deckDefinitionLabel;
+    private JTextField errorMessage, supportedSites;
+    private JTextArea urlImporter, deckName, deckTerm, deckDefinition, replaceTerm, replaceDefinition, flashcardInformation;
+    private JLabel welcomeLabel, deckNameLabel, deckTermLabel, deckDefinitionLabel, flashcardIndex;
     private JComboBox deckComboBox, deckTermsComboBox, deckDefinitionsComboBox;
-    private final Color dark, light, darkGrey, lightGrey;
-    private final Border empty;
+    private Color dark, light, darkGrey, lightGrey;
+    private Border empty;
     private ArrayList<String> selectedTerms, selectedDefinitions;
     private int index;
     private String nameOfSet;
@@ -58,9 +57,6 @@ public class StudyToolUI implements ActionListener {
         creationPanel.setVisible(false);
         creationPanel.setBackground(lightGrey);
 
-        editorPanel = new JPanel();
-        editorPanel.setBackground(lightGrey);
-
         flashPanel = new JPanel();
         flashPanel.setVisible(true);
         flashPanel.setBackground(light);
@@ -71,6 +67,9 @@ public class StudyToolUI implements ActionListener {
 
         responsePanel = new JPanel();
         responsePanel.setBackground(light);
+
+        editorPanel = new JPanel();
+        editorPanel.setBackground(lightGrey);
 
         darkTheme = new JCheckBox("Dark Theme");
         darkTheme.setVisible(true);
@@ -119,12 +118,9 @@ public class StudyToolUI implements ActionListener {
         flashcardDisplayButton = createTextJButton("");
         flashcardDisplayButton.setBackground(lightGrey);
         flashcardDisplayButton.setOpaque(true);
-        flashcardDisplayButton.addActionListener(this);
 
         nextButton = createTextJButton("Next");
-        nextButton.addActionListener(this);
         previousButton = createTextJButton("Previous");
-        previousButton.addActionListener(this);
 
         importButton = createTextJButton("Import Flash Cards");
         okButton = createTextJButton("OK");
@@ -175,9 +171,15 @@ public class StudyToolUI implements ActionListener {
           }
         );
 
+        flashcardInformation = new JTextArea("");
+        flashcardInformation.setLineWrap(true);
+        flashcardInformation.setEditable(false);
+        flashcardInformation.setFocusable(false);
+
         deckNameLabel = new JLabel("Name of Deck:");
         deckTermLabel = new JLabel("Deck Term:");
         deckDefinitionLabel = new JLabel("Deck Definition:");
+        flashcardIndex = new JLabel("");
 
         mainUI.getContentPane().add(menuPanel, BorderLayout.LINE_START);
         mainUI.getContentPane().add(flashPanel, BorderLayout.CENTER);
@@ -193,11 +195,11 @@ public class StudyToolUI implements ActionListener {
         settingsUI.add(settingsPanel, BorderLayout.CENTER);
         settingsPanel.add(darkTheme);
 
-        studyUI.add(flashcardDisplayButton, BorderLayout.CENTER);
+        studyUI.add(flashcardIndex, BorderLayout.NORTH);
+        studyUI.add(flashcardInformation, BorderLayout.CENTER);
+        studyUI.add(flashcardDisplayButton, BorderLayout.SOUTH);
         studyUI.add(previousButton, BorderLayout.WEST);
         studyUI.add(nextButton, BorderLayout.EAST);
-
-        editorUI.add(editorPanel);
 
         cardImporterUI.getContentPane().add(supportedSites, BorderLayout.NORTH);
         cardImporterUI.getContentPane().add(urlImporter, BorderLayout.CENTER);
@@ -305,7 +307,6 @@ public class StudyToolUI implements ActionListener {
                 mainUI.getContentPane().setBackground(light);
             }
             isDark = !isDark;
-            // Implement saving
         }
         else if (e.getSource() == cardsIconButton) {
             mainUI.setVisible(true);
@@ -341,24 +342,36 @@ public class StudyToolUI implements ActionListener {
             selectionUI.setVisible(false);
             studyUI.setVisible(true);
             nameOfSet = String.valueOf(deckComboBox.getSelectedItem());
+            selectionUI.remove(deckComboBox);
+            System.out.println(nameOfSet);
             CardCreator cardCreator = CardCreator.getSelectedDeck(nameOfSet);
             selectedTerms = cardCreator.getTerms();
             selectedDefinitions = cardCreator.getDefinitions();
-            flashcardDisplayButton.setText(selectedTerms.get(index));
+            flashcardIndex.setText("1/" + selectedTerms.size());
+            flashcardInformation.setText("Term: " + selectedTerms.get(index));
+            flashcardDisplayButton.setText("Click me to Flip Card");
         }
         else if (e.getSource() == flashcardDisplayButton) {
-            flashcardDisplayButton.setText(selectedDefinitions.get(index));
+            String text = flashcardInformation.getText();
+            if (text.startsWith("Term")) {
+                flashcardInformation.setText("Definition: " + selectedDefinitions.get(index));
+            }
+            else {
+                flashcardInformation.setText("Term: " + selectedTerms.get(index));
+            }
         }
         else if (e.getSource() == nextButton) {
             if (index < selectedTerms.size() - 1) {
                 index++;
-                flashcardDisplayButton.setText(selectedTerms.get(index));
+                flashcardIndex.setText((index+1) + "/" + selectedTerms.size());
+                flashcardInformation.setText("Term: " + selectedTerms.get(index));
             }
         }
         else if (e.getSource() == previousButton) {
             if (index > 0) {
                 index--;
-                flashcardDisplayButton.setText(selectedTerms.get(index));
+                flashcardIndex.setText((index+1) + "/" + selectedTerms.size());
+                flashcardInformation.setText("Term: " + selectedTerms.get(index));
             }
         }
         else if (e.getSource() == newDeckButton) {
@@ -389,72 +402,66 @@ public class StudyToolUI implements ActionListener {
         }
         else if (e.getSource() == confirmEditButton) {
             selectionUI.setVisible(false);
+            selectionUI.remove(deckComboBox);
             editorUI.setVisible(true);
             nameOfSet = String.valueOf(deckComboBox.getSelectedItem());
             CardCreator editSet = CardCreator.getSelectedDeck(nameOfSet);
             if (editSet != null) {
                 selectedTerms = editSet.getTerms();
                 selectedDefinitions = editSet.getDefinitions();
-                deckTermsComboBox = new JComboBox();
-                for (int i = 0; i < selectedTerms.size(); i++) {
-                    String temp = selectedTerms.get(i);
-                    if (temp.length() > 30) {
-                        temp = temp.substring(0, 30) + "...";
-                    }
-                    deckTermsComboBox.addItem((i+1) + ". " + temp);
-                }
-                deckTermsComboBox.addActionListener(this);
-                deckDefinitionsComboBox = new JComboBox();
-                for (int i = 0; i < selectedDefinitions.size(); i++) {
-                    String temp = selectedDefinitions.get(i);
-                    if (temp.length() > 30) {
-                        temp = temp.substring(0, 30) + "...";
-                    }
-                    deckDefinitionsComboBox.addItem((i+1) + ". " + temp);
-                }
-                deckDefinitionsComboBox.addActionListener(this);
+                revalidateTermCombo();
+                revalidateDefinitionCombo();
                 replaceTerm = new JTextArea();
                 replaceTerm.setLineWrap(true);
                 replaceDefinition = new JTextArea();
                 replaceDefinition.setLineWrap(true);
                 makeEditButton.addActionListener(this);
-                JPanel tempCenterPanel = new JPanel();
-                GridLayout editorLayout = new GridLayout(0,2);
-                tempCenterPanel.setLayout(editorLayout);
-                tempCenterPanel.add(deckTermsComboBox);
-                tempCenterPanel.add(replaceTerm);
-                tempCenterPanel.add(deckDefinitionsComboBox);
-                tempCenterPanel.add(replaceDefinition);
-                tempCenterPanel.add(makeEditButton);
-                tempCenterPanel.add(newCardButton);
-                editorPanel.setBackground(lightGrey);
-                editorPanel.add(tempCenterPanel);
-                editorUI.add(editorPanel);
+                editorPanel.removeAll();
                 editorPanel.revalidate();
+                editorPanel.repaint();
+                GridLayout editorLayout = new GridLayout(0,2);
+                editorPanel.setLayout(editorLayout);
+                editorPanel.add(deckTermsComboBox);
+                editorPanel.add(replaceTerm);
+                editorPanel.add(deckDefinitionsComboBox);
+                editorPanel.add(replaceDefinition);
+                editorPanel.add(makeEditButton);
+                editorPanel.add(newCardButton);
+                editorUI.add(editorPanel);
             }
         }
         else if (e.getSource() == deckTermsComboBox) {
             index = deckTermsComboBox.getSelectedIndex();
             replaceTerm.setText(selectedTerms.get(index));
-            editorPanel.revalidate();
         }
         else if (e.getSource() == deckDefinitionsComboBox) {
             index = deckTermsComboBox.getSelectedIndex();
             replaceDefinition.setText(selectedDefinitions.get(index));
-            editorPanel.revalidate();
         }
         else if (e.getSource() == makeEditButton) {
             CardCreator editSet = CardCreator.getSelectedDeck(nameOfSet);
-            String selectedTerm = String.valueOf(deckTermsComboBox.getSelectedItem());
+            int indexOfTerm = deckTermsComboBox.getSelectedIndex();
+            int indexOfDefinition = deckDefinitionsComboBox.getSelectedIndex();
             String newTerm = replaceTerm.getText();
             String newDefinition = replaceDefinition.getText();
-            editSet.removeCard(selectedTerm, newTerm, newDefinition);
+            if (editSet != null) {
+                if (newTerm.length() > 0) {
+                    editSet.replaceCard(indexOfTerm, newTerm, true);
+                }
+                if (newDefinition.length() > 0) {
+                    editSet.replaceCard(indexOfDefinition, newDefinition, false);
+                }
+            }
+            revalidateTermCombo();
+            revalidateDefinitionCombo();
         }
         else if (e.getSource() == newCardButton) {
             CardCreator editSet = CardCreator.getSelectedDeck(nameOfSet);
             String newTerm = replaceTerm.getText();
             String newDefinition = replaceDefinition.getText();
             editSet.addNewCard(newTerm, newDefinition);
+            revalidateTermCombo();
+            revalidateDefinitionCombo();
         }
         else if (e.getSource() == mainImportButton) {
             cardImporterUI.setVisible(true);
@@ -489,5 +496,33 @@ public class StudyToolUI implements ActionListener {
         else if (e.getSource() == okButton) {
             responseUI.setVisible(false);
         }
+    }
+
+    public void revalidateTermCombo() {
+        deckTermsComboBox = new JComboBox();
+        for (int i = 0; i < selectedTerms.size(); i++) {
+            String temp = selectedTerms.get(i);
+            if (temp.length() > 30) {
+                temp = temp.substring(0, 30) + "...";
+            }
+            deckTermsComboBox.addItem((i+1) + ". " + temp);
+        }
+        deckTermsComboBox.addActionListener(this);
+        deckTermsComboBox.revalidate();
+        deckTermsComboBox.repaint();
+    }
+
+    public void revalidateDefinitionCombo() {
+        deckDefinitionsComboBox = new JComboBox();
+        for (int i = 0; i < selectedDefinitions.size(); i++) {
+            String temp = selectedDefinitions.get(i);
+            if (temp.length() > 30) {
+                temp = temp.substring(0, 30) + "...";
+            }
+            deckDefinitionsComboBox.addItem((i+1) + ". " + temp);
+        }
+        deckDefinitionsComboBox.addActionListener(this);
+        deckDefinitionsComboBox.revalidate();
+        deckDefinitionsComboBox.repaint();
     }
 }

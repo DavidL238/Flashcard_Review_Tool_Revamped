@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.*;
 import java.util.ArrayList;
 
@@ -24,41 +25,92 @@ public class CardImporter extends CardCreator{
                 attribute = "<span class=\"TermText notranslate lang-en\">";
                 tag = "</span>";
                 site = "Quizlet";
+                try {
+                    String topic = findElement("<div class=\"SetPage-titleWrapper\"><h1>", "</h1>");
+                    String author = findElement("<span class=\"UserLink-username\">", "</span>");
+                    String fileName = topic + "_" + author + "_" + site;
+                    super.setNameOfSet(fileName);
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
             }
             case 2 -> {
-                attribute = "<font class=\"font-s\">";
-                tag = "</font>";
+                attribute = "<div class=\"front_text card_text\">";
+                tag = "</div>";
                 site = "Cram";
+                try {
+                    String topic = findElement("<input type=\"hidden\" id=\"setURLLink\" value=\"www.cram.com/flashcards/", "\"");
+                    System.out.println(topic);
+                    super.setNameOfSet(topic + "_" + site);
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             case -1 -> {
                 return false;
             }
         }
         try {
-            String topic = findElement("<h1 class=\"UIHeading UIHeading--one\">", "</h1>");
-            String author = findElement("<span class=\"UserLink-username\">", "</span>");
-            String fileName = topic + "_" + author + "_" + site;
-            super.setNameOfSet(fileName);
-
             InputStreamReader input = new InputStreamReader(urlConnect.getInputStream());
             BufferedReader bR = new BufferedReader(input);
+            ArrayList<String> cramTerms = new ArrayList<>();
+            ArrayList<String> cramDefinitions = new ArrayList<>();
             String line;
             while ((line = bR.readLine()) != null) {
                 int idxStart = line.indexOf(attribute);
                 while (idxStart != -1) {
                     line = line.substring(idxStart + attribute.length());
                     int idxEnd = line.indexOf(tag);
+                    while (idxEnd == -1) {
+                        line = line + bR.readLine();
+                        idxEnd = line.indexOf(tag);
+                    }
                     String word = line.substring(0,idxEnd);
-                    while (word.contains("<br>")) {
-                        int brIdx = word.indexOf("<br>");
-                        word = word.substring(0, brIdx) + " " + word.substring(brIdx + 4);
+                    word = removeHTMLEntity(word, "<br>");
+                    word = removeHTMLEntity(word, "<p>");
+                    word = removeHTMLEntity(word, "</p>");
+                    word = removeHTMLEntity(word, "  ");
+                    word = replaceHTMLEntity(word, "&quot;", "\"");
+                    while (word.startsWith(" ")) {
+                        word = word.substring(1);
                     }
-                    while (word.contains("&quot;")) {
-                        int htmlIdx = word.indexOf("&quot;");
-                        word = word.substring(0, htmlIdx) + "\"" + word.substring(htmlIdx + 6);
+                    if (websiteType == 1) {
+                        super.addNewCard(word);
                     }
-                    super.addNewCard(word);
+                    else {
+                        cramTerms.add(word);
+                    }
                     idxStart = line.indexOf(attribute);
+                }
+            }
+            if (websiteType == 2) {
+                bR = new BufferedReader(input);
+                attribute = "<div class=\"back_text card_text\">";
+                while ((line = bR.readLine()) != null) {
+                    int idxStart = line.indexOf(attribute);
+                    line = line.substring(idxStart + attribute.length());
+                    int idxEnd = line.indexOf(tag);
+                    while (idxEnd == -1) {
+                        line = line + bR.readLine();
+                        idxEnd = line.indexOf(tag);
+                    }
+                    String word = line.substring(0,idxEnd);
+                    System.out.println("DEF" + word);
+                    word = removeHTMLEntity(word, "<br>");
+                    word = removeHTMLEntity(word, "<p>");
+                    word = removeHTMLEntity(word, "</p>");
+                    word = removeHTMLEntity(word, "  ");
+                    word = replaceHTMLEntity(word, "&quot;", "\"");
+                    while (word.startsWith(" ")) {
+                        word = word.substring(1);
+                    }
+                    cramDefinitions.add(word);
+                }
+                System.out.println(cramDefinitions.size());
+                for (int i = 0; i < cramDefinitions.size(); i++) {
+                    super.addNewCard(cramTerms.get(i), cramDefinitions.get(i));
                 }
             }
         }
@@ -101,6 +153,22 @@ public class CardImporter extends CardCreator{
 
     public boolean isSuccessful() {
         return success;
+    }
+
+    public String removeHTMLEntity(String input, String entity) {
+        while (input.contains(entity)) {
+            int htmlIdx = input.indexOf(entity);
+            input = input.substring(0, htmlIdx) + input.substring(htmlIdx + entity.length());
+        }
+        return input;
+    }
+
+    public String replaceHTMLEntity(String input, String entity, String replaceChar) {
+        while (input.contains(entity)) {
+            int htmlIdx = input.indexOf(entity);
+            input = input.substring(0, htmlIdx) + replaceChar + input.substring(htmlIdx + entity.length());
+        }
+        return input;
     }
 
 }

@@ -13,34 +13,25 @@ public class CardShuffler {
         randTerms = new ArrayList<>();
         randIndexes = new ArrayList<>();
         answerChoices = new ArrayList<>();
-        score = 0;
         sizeOfDeck = cardCreator.getTerms().size();
+        System.out.println("Size of Deck " + sizeOfDeck);
+        shuffleDeck();
     }
 
     public void shuffleDeck() {
+        score = 0;
         for (int i = 0; i < sizeOfDeck; i++) {
-            boolean addToArray = true;
-            while (true) {
-                int rand = (int)(Math.random()*sizeOfDeck);
-                for (int indexes : randIndexes) {
-                    if (indexes == rand) {
-                        addToArray = false;
-                        break;
-                    }
-                }
-                if (addToArray) {
-                    randIndexes.add(rand);
-                    break;
-                }
-            }
+            int rand = (int)(Math.random()*sizeOfDeck);
+            randIndexes.add(rand);
         }
+        System.out.println("done");
         initializeRandTerms();
         initializeAnswers();
     }
 
     private void initializeRandTerms() {
         for (int indexes : randIndexes) {
-            randTerms.add(cardCreator.getTerms().get(indexes));
+            System.out.println(randTerms.add(cardCreator.getTerms().get(indexes)));
         }
     }
 
@@ -62,7 +53,7 @@ public class CardShuffler {
                     }
                     if (!answerUsed) {
                         int placement = (int) (Math.random() * 2);
-                        usedIndexes.add(rand, placement);
+                        usedIndexes.add(placement, rand);
                         break;
                     }
                 }

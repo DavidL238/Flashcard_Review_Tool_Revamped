@@ -8,33 +8,33 @@ import java.util.Objects;
 import java.net.*;
 
 public class StudyToolUI implements ActionListener {
-    private JCheckBox darkTheme;
-    private JFrame mainUI, settingsUI, creationUI, selectionUI, editorUI, studyUI, cardImporterUI, responseUI;
+    private JCheckBox DARKTheme;
+    private JFrame mainUI, settingsUI, creationUI, selectionUI, editorUI, studyUI, matchTermsUI, cardImporterUI, responseUI;
     private JPanel menuPanel, flashPanel, creationPanel, settingsPanel, responsePanel;
     private JPanel editorPanel;
     private JButton cardsIconButton, settingsIconButton, flashcardDisplayButton, nextButton, previousButton, newDeckButton, createDeckButton,
-            newCardButton, mainStudyButton, enhancedStudyButton, regularStudyButton, minigameStudyButton, editDeckButton, confirmEditButton, finalizeEditButton, mainImportButton,
-            importButton, okButton;
+            mainStudyButton, confirmStudyButton, matchTermsButton, confirmDeckButton, editDeckButton,
+            confirmEditButton, finalizeEditButton, newCardButton, mainImportButton, importButton, okButton;
     private JTextField errorMessage, supportedSites;
     private JTextArea urlImporter, deckName, deckTerm, deckDefinition, replaceTerm, replaceDefinition, flashcardInformation;
     private JLabel welcomeLabel, deckNameLabel, deckTermLabel, deckDefinitionLabel, flashcardIndex;
     private JComboBox deckComboBox, deckTermsComboBox, deckDefinitionsComboBox;
-    private Color dark, light, darkGrey, lightGrey;
-    private Border transparent, textBorder;
+    private final Color DARK, LIGHT, DARK_GREY, LIGHT_GREY;
+    private final Border TRANSPARENT, TEXT_BORDER;
     private ArrayList<String> selectedTerms, selectedDefinitions;
-    private int index;
+    private int index, score;
     private String nameOfSet;
-    private boolean isDark;
+    private boolean isDARK;
 
     public StudyToolUI() {
-        isDark = false;
-        dark = new Color(12,12,12);
-        darkGrey = new Color(40,40,40);
-        light = new Color(255,255,255);
-        lightGrey = new Color(211, 211, 211);
+        isDARK = false;
+        DARK = new Color(12,12,12);
+        DARK_GREY = new Color(40,40,40);
+        LIGHT = new Color(255,255,255);
+        LIGHT_GREY = new Color(211, 211, 211);
         Color temp = new Color(255, 0, 0);
-        transparent = javax.swing.BorderFactory.createEmptyBorder();
-        textBorder = new LineBorder(dark, 1, true);
+        TRANSPARENT = javax.swing.BorderFactory.createEmptyBorder();
+        TEXT_BORDER = new LineBorder(DARK, 1, true);
 
         mainUI = createJFrame("Java Study Tool", 852, 720);
         mainUI.setVisible(true);
@@ -44,12 +44,13 @@ public class StudyToolUI implements ActionListener {
         selectionUI = createJFrame("Select Deck", 300, 90);
         editorUI = createJFrame("Edit Deck", 600, 600);
         studyUI = createJFrame("Flashcards", 600, 400);
+        matchTermsUI = createJFrame("Multiple Choice", 600, 400);
         responseUI = createJFrame("Error", 400, 120);
 
         menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.PAGE_AXIS));
         menuPanel.setVisible(true);
-        menuPanel.setBackground(lightGrey);
+        menuPanel.setBackground(LIGHT_GREY);
 
         creationPanel = new JPanel();
         GroupLayout creationLayout = new GroupLayout(creationPanel);
@@ -57,73 +58,73 @@ public class StudyToolUI implements ActionListener {
         creationLayout.setAutoCreateContainerGaps(true);
         creationPanel.setLayout(creationLayout);
         creationPanel.setVisible(false);
-        creationPanel.setBackground(lightGrey);
+        creationPanel.setBackground(LIGHT_GREY);
 
         flashPanel = new JPanel();
         flashPanel.setVisible(true);
-        flashPanel.setBackground(light);
+        flashPanel.setBackground(LIGHT);
 
         settingsPanel = new JPanel();
         settingsPanel.setVisible(false);
-        settingsPanel.setBackground(light);
+        settingsPanel.setBackground(LIGHT);
 
         responsePanel = new JPanel();
-        responsePanel.setBackground(light);
+        responsePanel.setBackground(LIGHT);
 
         editorPanel = new JPanel();
-        editorPanel.setBackground(lightGrey);
+        editorPanel.setBackground(LIGHT_GREY);
 
-        darkTheme = new JCheckBox("Dark Theme");
-        darkTheme.setVisible(true);
-        darkTheme.addActionListener(this);
-        darkTheme.setFocusPainted(false);
-        darkTheme.setPreferredSize(new Dimension(100, 25));
-        darkTheme.setBackground(temp);
+        DARKTheme = new JCheckBox("DARK Theme");
+        DARKTheme.setVisible(true);
+        DARKTheme.addActionListener(this);
+        DARKTheme.setFocusPainted(false);
+        DARKTheme.setPreferredSize(new Dimension(100, 25));
+        DARKTheme.setBackground(temp);
 
         cardsIconButton = createIconJButton("images\\flashcards.png");
         settingsIconButton = createIconJButton("images\\gear.png");
 
         mainImportButton = createTextJButton("Import Flash Cards");
-        mainImportButton.setBackground(lightGrey);
+        mainImportButton.setBackground(LIGHT_GREY);
         mainImportButton.setOpaque(true);
 
         newDeckButton = createTextJButton("Create New Deck");
-        newDeckButton.setBackground(lightGrey);
+        newDeckButton.setBackground(LIGHT_GREY);
         newDeckButton.setOpaque(true);
 
         createDeckButton = createTextJButton("Finalize");
-        createDeckButton.setBackground(light);
+        createDeckButton.setBackground(LIGHT);
         createDeckButton.setOpaque(true);
 
         editDeckButton = createTextJButton("Edit Existing Deck");
-        editDeckButton.setBackground(lightGrey);
+        editDeckButton.setBackground(LIGHT_GREY);
         editDeckButton.setOpaque(true);
 
         newCardButton = createTextJButton("Create Card");
-        newCardButton.setBackground(lightGrey);
+        newCardButton.setBackground(LIGHT_GREY);
         newCardButton.setOpaque(true);
 
         confirmEditButton = createTextJButton("Edit");
-        confirmEditButton.setBackground(light);
+        confirmEditButton.setBackground(LIGHT);
         confirmEditButton.setOpaque(true);
 
         finalizeEditButton = createTextJButton("Make Edit");
-        finalizeEditButton.setBackground(lightGrey);
+        finalizeEditButton.setBackground(LIGHT_GREY);
         finalizeEditButton.setOpaque(true);
 
         mainStudyButton = createTextJButton("Study Flashcards");
-        mainStudyButton.setBackground(lightGrey);
+        mainStudyButton.setBackground(LIGHT_GREY);
         mainStudyButton.setOpaque(true);
 
-        enhancedStudyButton = createTextJButton("Match The Terms");
-        enhancedStudyButton.setBackground(lightGrey);
-        enhancedStudyButton.setOpaque(true);
-
-        regularStudyButton = createTextJButton("Confirm Selection");
-        minigameStudyButton = createTextJButton("Confirm Selection");
+        matchTermsButton = createTextJButton("Match The Terms");
+        matchTermsButton.setBackground(LIGHT_GREY);
+        matchTermsButton.setOpaque(true);
+        
+        confirmDeckButton = createTextJButton("Confirm Selection");
+        confirmStudyButton = createTextJButton("Confirm Selection");
 
         flashcardDisplayButton = createTextJButton("");
-        flashcardDisplayButton.setBackground(lightGrey);
+        flashcardDisplayButton.setBackground(LIGHT_GREY);
         flashcardDisplayButton.setOpaque(true);
 
         nextButton = createTextJButton("Next");
@@ -133,7 +134,7 @@ public class StudyToolUI implements ActionListener {
 
         importButton = createTextJButton("Import Flash Cards");
         okButton = createTextJButton("OK");
-        okButton.setBackground(lightGrey);
+        okButton.setBackground(LIGHT_GREY);
         okButton.setFocusPainted(false);
 
         welcomeLabel = new JLabel("Welcome");
@@ -196,14 +197,14 @@ public class StudyToolUI implements ActionListener {
         menuPanel.add(settingsIconButton);
         flashPanel.add(welcomeLabel);
         flashPanel.add(mainStudyButton);
-        flashPanel.add(enhancedStudyButton);
+        flashPanel.add(matchTermsButton);
         flashPanel.add(newDeckButton);
         flashPanel.add(editDeckButton);
         flashPanel.add(mainImportButton);
         mainUI.revalidate();
 
         settingsUI.add(settingsPanel, BorderLayout.CENTER);
-        settingsPanel.add(darkTheme);
+        settingsPanel.add(DARKTheme);
 
         studyUI.add(flashcardIndex, BorderLayout.NORTH);
         studyUI.add(flashcardInformation, BorderLayout.CENTER);
@@ -293,30 +294,30 @@ public class StudyToolUI implements ActionListener {
         newText.setFocusable(false);
         newText.setFont(new Font("Tahoma", Font.PLAIN, fontSize)); //better font
         newText.setOpaque(false);
-        newText.setBorder(transparent);
+        newText.setBorder(TRANSPARENT);
         return newText;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == darkTheme) {
-            if (!isDark) {
-                darkTheme.setForeground(light);
-                darkTheme.setBackground(darkGrey);
-                menuPanel.setBackground(dark);
-                flashPanel.setBackground(darkGrey);
-                settingsPanel.setBackground(darkGrey);
-                mainUI.setBackground(dark);
+        if (e.getSource() == DARKTheme) {
+            if (!isDARK) {
+                DARKTheme.setForeground(LIGHT);
+                DARKTheme.setBackground(DARK_GREY);
+                menuPanel.setBackground(DARK);
+                flashPanel.setBackground(DARK_GREY);
+                settingsPanel.setBackground(DARK_GREY);
+                mainUI.setBackground(DARK);
             }
             else {
-                darkTheme.setForeground(dark);
-                darkTheme.setBackground(light);
-                menuPanel.setBackground(lightGrey);
-                flashPanel.setBackground(light);
-                settingsPanel.setBackground(light);
-                mainUI.getContentPane().setBackground(light);
+                DARKTheme.setForeground(DARK);
+                DARKTheme.setBackground(LIGHT);
+                menuPanel.setBackground(LIGHT_GREY);
+                flashPanel.setBackground(LIGHT);
+                settingsPanel.setBackground(LIGHT);
+                mainUI.getContentPane().setBackground(LIGHT);
             }
-            isDark = !isDark;
+            isDARK = !isDARK;
         }
         else if (e.getSource() == cardsIconButton) {
             mainUI.setVisible(true);
@@ -331,23 +332,12 @@ public class StudyToolUI implements ActionListener {
             settingsUI.revalidate();
         }
         else if (e.getSource() == mainStudyButton) {
-            try {
-                selectionUI.remove(confirmEditButton);
-            }
-            catch (Exception exception) {
-                exception.printStackTrace();
-            }
-            ArrayList<String> allTitles = CardCreator.getAllTitles();
-            deckComboBox = new JComboBox();
-            for (String allTitle : allTitles) {
-                deckComboBox.addItem(allTitle);
-            }
-            deckComboBox.setEditable(false);
-            selectionUI.getContentPane().add(deckComboBox, BorderLayout.NORTH);
-            selectionUI.getContentPane().add(regularStudyButton, BorderLayout.SOUTH);
-            selectionUI.setVisible(true);
+            revalidateSelectionUI();
+            selectionUI.getContentPane().add(confirmStudyButton, BorderLayout.SOUTH);
+            selectionUI.revalidate();
+            selectionUI.repaint();
         }
-        else if (e.getSource() == regularStudyButton) {
+        else if (e.getSource() == confirmStudyButton) {
             index = 0;
             selectionUI.setVisible(false);
             studyUI.setVisible(true);
@@ -361,8 +351,57 @@ public class StudyToolUI implements ActionListener {
             flashcardInformation.setText("Term: " + selectedTerms.get(index));
             flashcardDisplayButton.setText("Click me to Flip Card");
         }
-        else if (e.getSource() == minigameStudyButton) {
+        else if (e.getSource() == matchTermsButton) {
+            revalidateSelectionUI();
+            selectionUI.getContentPane().add(confirmDeckButton, BorderLayout.SOUTH);
+            selectionUI.revalidate();
+            selectionUI.repaint();
+        }
+        else if (e.getSource() == confirmDeckButton) {
+            selectionUI.setVisible(false);
+            matchTermsUI.setVisible(true);
+            String nameOfSet = (Objects.requireNonNull(deckComboBox.getSelectedItem())).toString();
+            CardCreator cC = CardCreator.getSelectedDeck(nameOfSet);
+            assert cC != null;
+            CardShuffler cS = new CardShuffler(cC);
+            ArrayList<String> choices = cS.getChoices();
+            JTextArea term = new JTextArea();
+            term.setText(cS.getTerm());
+            term.setPreferredSize(new Dimension(400, 100));
 
+            JPanel topPanel = new JPanel();
+            score = cS.getScore();
+            JTextField scoreDisplay = createJTextField("Score: " + score, 24);
+            topPanel.add(scoreDisplay, BorderLayout.EAST);
+
+            JPanel choicePanel = new JPanel();
+            JButton choiceOne = createTextJButton(choices.get(0));
+            Dimension buttonSize = new Dimension(200, 100);
+            choiceOne.setPreferredSize(buttonSize);
+            choiceOne.setOpaque(true);
+            choiceOne.setBackground(DARK);
+            JButton choiceTwo = createTextJButton(choices.get(1));
+            choiceTwo.setPreferredSize(buttonSize);
+            choiceTwo.setOpaque(true);
+            choiceTwo.setBackground(DARK);
+            JButton choiceThree = createTextJButton(choices.get(2));
+            choiceThree.setOpaque(true);
+            choiceThree.setPreferredSize(buttonSize);
+            choiceThree.setBackground(DARK);
+            JButton choiceFour = createTextJButton(choices.get(3));
+            choiceFour.setOpaque(true);
+            choiceFour.setPreferredSize(buttonSize);
+            choiceFour.setBackground(DARK);
+            System.out.println("1. " + choiceOne.getText() + "2. " + choiceTwo.getText() + "3. " + choiceThree.getText() + "4. " + choiceFour.getText());
+            choicePanel.add(term);
+            choicePanel.add(choiceOne);
+            choicePanel.add(choiceTwo);
+            choicePanel.add(choiceThree);
+            choicePanel.add(choiceFour);
+            matchTermsUI.add(topPanel, BorderLayout.NORTH);
+            matchTermsUI.add(choicePanel, BorderLayout.CENTER);
+            matchTermsUI.revalidate();
+            matchTermsUI.repaint();
         }
         else if (e.getSource() == flashcardDisplayButton) {
             String text = flashcardInformation.getText();
@@ -397,21 +436,10 @@ public class StudyToolUI implements ActionListener {
             creationUI.setVisible(false);
         }
         else if (e.getSource() == editDeckButton) {
-            try {
-                selectionUI.remove(regularStudyButton);
-            }
-            catch (Exception exception) {
-                exception.printStackTrace();
-            }
-            ArrayList<String> allTitles = CardCreator.getAllTitles();
-            deckComboBox = new JComboBox();
-            for (String allTitle : allTitles) {
-                deckComboBox.addItem(allTitle);
-            }
-            deckComboBox.setEditable(false);
-            selectionUI.getContentPane().add(deckComboBox, BorderLayout.NORTH);
+            revalidateSelectionUI();
             selectionUI.getContentPane().add(confirmEditButton, BorderLayout.SOUTH);
-            selectionUI.setVisible(true);
+            selectionUI.revalidate();
+            selectionUI.repaint();
         }
         else if (e.getSource() == confirmEditButton) {
             selectionUI.setVisible(false);
@@ -426,10 +454,10 @@ public class StudyToolUI implements ActionListener {
                 revalidateDefinitionCombo();
                 replaceTerm = new JTextArea();
                 replaceTerm.setLineWrap(true);
-                replaceTerm.setBorder(textBorder);
+                replaceTerm.setBorder(TEXT_BORDER);
                 replaceDefinition = new JTextArea();
                 replaceDefinition.setLineWrap(true);
-                replaceDefinition.setBorder(textBorder);
+                replaceDefinition.setBorder(TEXT_BORDER);
                 editorPanel.removeAll();
                 editorPanel.revalidate();
                 editorPanel.repaint();
@@ -566,5 +594,34 @@ public class StudyToolUI implements ActionListener {
         editorPanel.add(deckDefinitionsComboBox, 0, 1);
         editorPanel.revalidate();
         editorPanel.repaint();
+    }
+
+    public void revalidateSelectionUI() {
+        try {
+            selectionUI.remove(confirmStudyButton);
+        }
+        catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        try {
+            selectionUI.remove(confirmEditButton);
+        }
+        catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        try {
+            selectionUI.remove(confirmDeckButton);
+        }
+        catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        ArrayList<String> allTitles = CardCreator.getAllTitles();
+        deckComboBox = new JComboBox();
+        for (String allTitle : allTitles) {
+            deckComboBox.addItem(allTitle);
+        }
+        deckComboBox.setEditable(false);
+        selectionUI.getContentPane().add(deckComboBox, BorderLayout.NORTH);
+        selectionUI.setVisible(true);
     }
 }

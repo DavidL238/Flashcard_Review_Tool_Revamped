@@ -44,7 +44,7 @@ public class StudyToolUI implements ActionListener {
         selectionUI = createJFrame("Select Deck", 300, 90);
         editorUI = createJFrame("Edit Deck", 600, 600);
         studyUI = createJFrame("Flashcards", 600, 400);
-        matchTermsUI = createJFrame("Multiple Choice", 600, 400);
+        matchTermsUI = createJFrame("Multiple Choice", 800, 600);
         responseUI = createJFrame("Error", 400, 120);
 
         menuPanel = new JPanel();
@@ -361,13 +361,19 @@ public class StudyToolUI implements ActionListener {
             selectionUI.setVisible(false);
             matchTermsUI.setVisible(true);
             String nameOfSet = (Objects.requireNonNull(deckComboBox.getSelectedItem())).toString();
+            selectionUI.remove(deckComboBox);
             CardCreator cC = CardCreator.getSelectedDeck(nameOfSet);
             assert cC != null;
             CardShuffler cS = new CardShuffler(cC);
             ArrayList<String> choices = cS.getChoices();
             JTextArea term = new JTextArea();
             term.setText(cS.getTerm());
-            term.setPreferredSize(new Dimension(400, 100));
+            term.setPreferredSize(new Dimension(600, 200));
+            Font buttonFont = new Font("Montserrat", Font.PLAIN, 16);
+            Font questionFont = new Font("Montserrat", Font.PLAIN, 32);
+            term.setFont(questionFont);
+            term.setEditable(false);
+            term.setOpaque(false);
 
             JPanel topPanel = new JPanel();
             score = cS.getScore();
@@ -376,22 +382,26 @@ public class StudyToolUI implements ActionListener {
 
             JPanel choicePanel = new JPanel();
             JButton choiceOne = createTextJButton(choices.get(0));
-            Dimension buttonSize = new Dimension(200, 100);
+            choiceOne.setFont(buttonFont);
+            Dimension buttonSize = new Dimension(300, 150);
             choiceOne.setPreferredSize(buttonSize);
             choiceOne.setOpaque(true);
-            choiceOne.setBackground(DARK);
+            choiceOne.setBackground(Color.decode("#ff3355"));
             JButton choiceTwo = createTextJButton(choices.get(1));
+            choiceTwo.setFont(buttonFont);
             choiceTwo.setPreferredSize(buttonSize);
             choiceTwo.setOpaque(true);
-            choiceTwo.setBackground(DARK);
+            choiceTwo.setBackground(Color.decode("#45a3e5"));
             JButton choiceThree = createTextJButton(choices.get(2));
+            choiceThree.setFont(buttonFont);
             choiceThree.setOpaque(true);
             choiceThree.setPreferredSize(buttonSize);
-            choiceThree.setBackground(DARK);
+            choiceThree.setBackground(Color.decode("#ffc00a"));
             JButton choiceFour = createTextJButton(choices.get(3));
+            choiceFour.setFont(buttonFont);
             choiceFour.setOpaque(true);
             choiceFour.setPreferredSize(buttonSize);
-            choiceFour.setBackground(DARK);
+            choiceFour.setBackground(Color.decode("#66bf39"));
             System.out.println("1. " + choiceOne.getText() + "2. " + choiceTwo.getText() + "3. " + choiceThree.getText() + "4. " + choiceFour.getText());
             choicePanel.add(term);
             choicePanel.add(choiceOne);

@@ -14,8 +14,9 @@ public class CardShuffler {
         randIndexes = new ArrayList<>();
         answerChoices = new ArrayList<>();
         sizeOfDeck = cardCreator.getTerms().size();
-        System.out.println("Size of Deck " + sizeOfDeck);
-        shuffleDeck();
+        if (sizeOfDeck >= 4) {
+            shuffleDeck();
+        }
     }
 
     public void shuffleDeck() {
@@ -41,21 +42,18 @@ public class CardShuffler {
             ArrayList<Integer> usedIndexes = new ArrayList<>();
             int indexOfFirstTerm = randIndexes.get(0);
             usedIndexes.add(indexOfFirstTerm);
-            for (int p = 0; p < 3; p++) {
-                while (true) {
-                    int rand = (int) (Math.random() * sizeOfDeck);
-                    boolean answerUsed = false;
-                    for (int indexes : usedIndexes) {
-                        if (indexes == rand) {
-                            answerUsed = true;
-                            break;
-                        }
-                    }
-                    if (!answerUsed) {
-                        int placement = (int) (Math.random() * 2);
-                        usedIndexes.add(placement, rand);
+            while (usedIndexes.size() < 4) {
+                int rand = (int) (Math.random() * sizeOfDeck);
+                boolean answerUsed = false;
+                for (Integer usedIndex : usedIndexes) {
+                    if (usedIndex == rand) {
+                        answerUsed = true;
                         break;
                     }
+                }
+                if (!answerUsed) {
+                    int placement = (int) (Math.random() * 2);
+                    usedIndexes.add(placement, rand);
                 }
             }
             for (int idx : usedIndexes) {

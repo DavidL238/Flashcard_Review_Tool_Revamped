@@ -131,9 +131,7 @@ public class CardCreator {
                             allFlashCards.add(newDeck);
                         }
                     }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    catch (Exception e) {}
                 }
                 else {
                     allTitles.remove(i);

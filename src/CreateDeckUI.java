@@ -99,6 +99,7 @@ public class CreateDeckUI implements ActionListener {
             String temp = invalid.substring(i, i+1);
             if (namePrompt.getText().contains(temp)) {
                 valid = false;
+                ResponseUI error = new ResponseUI("Error", "Invalid Character used in Deck Name");
                 break;
             }
         }
@@ -109,7 +110,7 @@ public class CreateDeckUI implements ActionListener {
                 creationUI.setVisible(false);
             }
             else {
-                //create error ui
+                ResponseUI error = new ResponseUI("Error", "Invalid Character used in Deck Terms / Definitions");
             }
         }
     }

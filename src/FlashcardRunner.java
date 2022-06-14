@@ -7,6 +7,6 @@ public class FlashcardRunner {
         catch (Exception e) {
             e.printStackTrace();
         }
-        StudyToolUI studyTool = new StudyToolUI();
+        StudyUI studyUI = new StudyUI();
     }
 }

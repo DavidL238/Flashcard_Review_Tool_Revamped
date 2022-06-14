@@ -18,7 +18,7 @@ public class StudyUI implements ActionListener {
     }
 
     public void initializeUI() {
-        Dimension buttonSize = new Dimension(220, 120);
+        Dimension buttonSize = new Dimension(772, 120);
         Font buttonFont = new Font("Roboto", Font.PLAIN, 40);
         Font welcomeFont = new Font("Roboto", Font.PLAIN, 40);
 
@@ -75,11 +75,12 @@ public class StudyUI implements ActionListener {
         welcomeLabel.setFont(welcomeFont);
         welcomePanel.add(welcomeLabel);
 
+        //mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainUI.getContentPane().add(menuPanel, BorderLayout.LINE_START);
+        mainUI.getContentPane().add(welcomePanel, BorderLayout.NORTH);
         mainUI.getContentPane().add(mainPanel, BorderLayout.CENTER);
         menuPanel.add(cardsIconButton);
         menuPanel.add(settingsIconButton);
-        mainPanel.add(welcomeLabel);
         mainPanel.add(studyButton);
         mainPanel.add(matchTermsButton);
         mainPanel.add(newDeckButton);
